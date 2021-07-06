@@ -1,0 +1,49 @@
+from bs4 import BeautifulSoup
+
+def readandsoupsvg():
+    infile = open("kltest.svg","r")
+    contents = infile.read()
+    soup = BeautifulSoup(contents, "lxml-xml")
+    return soup
+
+def getviewbox(soup):
+    for tag in soup.find_all('svg'):
+        reading = tag['viewBox']
+        readinglist = reading.split(" ")
+    return readinglist
+
+def getfirstcoord(thelist):
+    xtranslate = float(thelist[0])
+    return xtranslate
+
+def getsecondcoord(thelist):
+    ytranslate = float(thelist[1])
+    return ytranslate
+
+def translate(soup, xtra, ytra):
+    ats = soup.find(id="page1").attrs
+    ats['transform']= "translate(%f, %f)" %(-xtra, -ytra)
+    #this alters the soup, then there is no return
+
+def group(soup):
+    soup.find(id="page1").wrap(soup.new_tag("g"))
+
+def export(soup, exportfilename):
+    svgmoved = open("%s.svg" %(exportfilename), "w+")
+    svgmoved.write(soup.prettify())
+    svgmoved.close()
+    
+    
+def main():   
+    soup = readandsoupsvg()
+    reading = getviewbox(soup)
+    xtra = getfirstcoord(reading)
+    ytra = getsecondcoord(reading)
+    
+    translate(soup, xtra, ytra)
+    group(soup)
+    
+    exportfilename = 'tgr'
+    export(soup, exportfilename)
+
+main()
